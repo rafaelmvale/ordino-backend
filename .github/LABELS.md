@@ -1,0 +1,10 @@
+- bug
+- enhancement
+- chore
+- docs
+- help wanted
+- blocked
+- urgent
+- epic
+- spike
+- question

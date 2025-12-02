@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ordino_dev
+      POSTGRES_USER: ordino
+      POSTGRES_PASSWORD: ordino
+    ports:
+      - "5432:5432"
+    volumes:
+      - ordino_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgres://ordino:ordino@db:5432/ordino_dev
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  ordino_db_data:
