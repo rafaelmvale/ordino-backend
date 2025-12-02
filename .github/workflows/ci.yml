@@ -15,8 +15,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "package-lock.json found → running npm ci --legacy-peer-deps"
+            npm ci --legacy-peer-deps
+          else
+            echo "no lockfile → running npm install --legacy-peer-deps"
+            npm install --legacy-peer-deps --no-audit --no-fund
+          fi
       - name: Lint
         run: npm run lint
       - name: Build
