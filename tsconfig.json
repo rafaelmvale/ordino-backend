@@ -3,6 +3,7 @@
       "module": "CommonJS",
       "target": "ES2022",
       "lib": ["es2022"],
+      "types": ["jest", "node"],
       "declaration": true,
       "sourceMap": true,
       "outDir": "./dist",
