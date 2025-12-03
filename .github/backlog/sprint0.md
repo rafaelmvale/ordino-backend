@@ -15,7 +15,7 @@ Preparar o terreno: arquitetura hexagonal / clean architecture, CI/CD, qualidade
 
 ---
 
-# Epics & Issues
+ #Epics & Issues
 
 > Use labels: `epic`, `backend`, `infra`, `design`, `devops`, `docs`, `research`, `priority:high|medium|low`, `sprint:0`
 
@@ -294,7 +294,7 @@ Preparar o terreno: arquitetura hexagonal / clean architecture, CI/CD, qualidade
 
 ---
 
-# Definition of Done (DoD) for Sprint 0
+ #Definition of Done (DoD) for Sprint 0
 
 - Code scaffold checked in and buildable (`npm ci && npm run build`).  
 - CI passes for PR (lint/build/test).  
@@ -305,7 +305,7 @@ Preparar o terreno: arquitetura hexagonal / clean architecture, CI/CD, qualidade
 
 ---
 
-# Labels recommended
+ #Labels recommended
 
 - epic, backend, frontend, infra, devops, design, docs, research, security, ux, product
 - priority:high, priority:medium, priority:low
@@ -313,12 +313,12 @@ Preparar o terreno: arquitetura hexagonal / clean architecture, CI/CD, qualidade
 
 ---
 
-# Roadmap quick view (after Sprint 0)
+ #Roadmap quick view (after Sprint 0)
 
-- Sprint 1: Core booking + auth + company onboarding + DB + tests.  
-- Sprint 2: Payments, invoices, basic dashboard, white-label basics.  
+- Sprint 1: Core booking + auth + company onboarding + DB + tests.
+- Sprint 2: Payments, invoices, basic dashboard, white-label basics.
 - Sprint 3: Multi-branch, scheduling advanced rules, notifications (WhatsApp), IA integration POC.
 
 ---
 
-# End of sprint0.md
+ #End of sprint0.md
