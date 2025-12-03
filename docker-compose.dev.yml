@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ordino
+      POSTGRES_PASSWORD: ordino
+      POSTGRES_DB: ordino_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ordino_db_data:/var/lib/postgresql/data
+
+volumes:
+  ordino_db_data:
