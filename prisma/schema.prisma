@@ -4,44 +4,195 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") 
+  url      = env("DATABASE_URL")
 }
 
 model Company {
-  id        String  @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-//   plans     Plan[]
-  branches  Branch[]
+  id            String         @id @default(uuid())
+  name          String
+  cnpj          String?        @unique
+  ownerId       String?        // FK to User.id (nullable on create)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime?      @updatedAt
+  branches      Branch[]
+  users         User[]
+  professionals Professional[]
+  services      Service[]
+  customers     Customer[]
+  appointments  Appointment[]
+  payments      Payment[]
+  companyPlan   CompanyPlan?
+
+  @@index([ownerId])
 }
 
 model Branch {
-  id        String  @id @default(uuid())
-  companyId String
-  name      String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
+  id            String         @id @default(uuid())
+  companyId     String
+  name          String
+  address       String?
+  timezone      String?
+  meta          Json?          // openingHours, etc.
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime?      @updatedAt
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+
   @@index([companyId])
 }
 
 model User {
-  id        String @id @default(uuid())
-  email     String @unique
+  id        String    @id @default(uuid())
+  companyId String
+  email     String
   name      String?
-  role      String
+  role      String    // OWNER | ADMIN | STAFF
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([email])
+  @@index([companyId])
+}
+
+model Professional {
+  id                String                @id @default(uuid())
+  companyId         String
+  name              String
+  email             String?
+  bio               String?
+  defaultDuration   Int                   @default(30) // minutes
+  active            Boolean               @default(true)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime?             @updatedAt
+  company           Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  professionalServices ProfessionalService[]
+  appointments      Appointment[]
+  
+  @@index([companyId])
+  @@index([email])
+}
+
+model Service {
+  id                String                @id @default(uuid())
+  companyId         String
+  name              String
+  duration          Int                   @default(30) // minutes
+  priceCents        Int?
+  active            Boolean               @default(true)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime?             @updatedAt
+  company           Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  professionalServices ProfessionalService[]
+  appointments      Appointment[]
+  
+  @@index([companyId])
+}
+
+model ProfessionalService {
+  id             String       @id @default(uuid())
+  professionalId String
+  serviceId      String
+  duration       Int?         // override
+  priceCents     Int?
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  @@unique([professionalId, serviceId])
+  @@index([professionalId])
+  @@index([serviceId])
+}
+
+model Customer {
+  id        String        @id @default(uuid())
+  companyId String
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime?     @updatedAt
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  
+  @@index([companyId])
+  @@index([email])
 }
 
 model Appointment {
-  id        String @id @default(uuid())
-  companyId String
-  branchId  String
-  professionalId String
-  customerName String
-  startsAt DateTime
-  endsAt   DateTime
-  status   String
+  id             String         @id @default(uuid())
+  companyId      String
+  branchId       String?
+  professionalId String?
+  serviceId      String?
+  customerId     String?
+  startsAt       DateTime
+  endsAt         DateTime
+  status         String         @default("SCHEDULED") // SCHEDULED|CONFIRMED|CANCELLED|COMPLETED|NO_SHOW
+  createdBy      String?        // userId
+  note           String?
+  source         String?        // WEB|ADMIN|MAGIC_LINK
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch         Branch?         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  professional   Professional?   @relation(fields: [professionalId], references: [id], onDelete: SetNull)
+  service        Service?        @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  customer       Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payments       Payment[]
+  
+  @@index([companyId])
+  @@index([branchId])
+  @@index([professionalId])
+  @@index([customerId])
+  @@index([startsAt])
 }
 
+model Payment {
+  id               String       @id @default(uuid())
+  companyId        String
+  appointmentId   String?
+  amountCents      Int
+  currency         String       @default("BRL")
+  status           String       @default("PENDING") // PENDING|PAID|FAILED|REFUNDED
+  provider         String?      // stripe, pagseguro, etc.
+  providerReference String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime?    @updatedAt
+  company          Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  appointment      Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  
+  @@index([companyId])
+  @@index([appointmentId])
+  @@index([status])
+}
+
+model Plan {
+  id                String        @id @default(uuid())
+  name              String
+  maxProfessionals  Int?
+  maxBranches       Int?
+  financialFeatures Boolean       @default(false)
+  priceCents        Int?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime?     @updatedAt
+  companyPlans      CompanyPlan[]
+  
+  @@unique([name])
+}
+
+model CompanyPlan {
+  id        String   @id @default(uuid())
+  companyId String   @unique
+  planId    String
+  startedAt DateTime  @default(now())
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([planId])
+}
 
 model MagicToken {
   id        String   @id @default(uuid())
@@ -53,4 +204,17 @@ model MagicToken {
   
   @@index([email])
   @@index([tokenHash])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  companyId String?
+  userId    String?
+  action    String
+  data      Json?
+  createdAt DateTime  @default(now())
+  
+  @@index([companyId])
+  @@index([userId])
+  @@index([createdAt])
 }
