@@ -19,9 +19,12 @@
     "migrate": "node ./scripts/run-migrations.js"
   },
   "dependencies": {
+    "@fastify/swagger": "^8.15.0",
+    "@fastify/swagger-ui": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-fastify": "^9.0.0",
+    "@nestjs/swagger": "^7.4.2",
     "@prisma/client": "^5.0.0",
     "fastify": "^4.0.0",
     "ioredis": "^5.3.2",
@@ -36,6 +39,7 @@
     "@types/jest": "^29.0.0",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.0.0",
+    "@types/yamljs": "^0.2.34",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^9.39.1",
@@ -49,6 +53,7 @@
     "ts-jest": "^29.0.0",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "yamljs": "^0.3.0"
   }
 }
