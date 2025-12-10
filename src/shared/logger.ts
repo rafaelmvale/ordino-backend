@@ -1,36 +1,22 @@
-type LogLevel = "info" | "warn" | "error" | "debug";
+import pino from "pino";
 
-class Logger {
-  private log(
-    level: LogLevel,
-    message: string,
-    meta?: Record<string, unknown>,
-  ) {
-    const timestamp = new Date().toISOString();
-    const logData = {
-      timestamp,
-      level,
-      message,
-      ...meta,
-    };
-    console.log(JSON.stringify(logData));
-  }
-
-  info(message: string, meta?: Record<string, unknown>) {
-    this.log("info", message, meta);
-  }
-
-  warn(message: string, meta?: Record<string, unknown>) {
-    this.log("warn", message, meta);
-  }
-
-  error(message: string, meta?: Record<string, unknown>) {
-    this.log("error", message, meta);
-  }
-
-  debug(message: string, meta?: Record<string, unknown>) {
-    this.log("debug", message, meta);
-  }
-}
-
-export const logger = new Logger();
+export const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  timestamp: pino.stdTimeFunctions.isoTime,
+  base: undefined,
+  formatters: {
+    level(label) {
+      return { severity: label.toUpperCase() };
+    },
+  },
+  transport:
+    process.env.NODE_ENV === "development"
+      ? {
+          target: "pino-pretty",
+          options: {
+            translateTime: "HH:MM:ss Z",
+            ignore: "pid,hostname",
+          },
+        }
+      : undefined,
+});
