@@ -13,16 +13,20 @@ export class CreateCompanyUseCase {
       throw new ValidationError("Nome inválido");
     }
 
-    if (payload.cnpj) {
-      const existing = await this.companyRepo.findByCnpj(payload.cnpj);
-      if (existing) {
-        throw new ConflictError("CNPJ já cadastrado");
-      }
+    let sanitizedCnpj = payload.cnpj ?? null;
+    if (sanitizedCnpj) {
+      sanitizedCnpj = sanitizedCnpj.replace(/\D/g, "");
+      if (sanitizedCnpj.length === 0) sanitizedCnpj = null;
+    }
+
+    if (sanitizedCnpj) {
+      const existing = await this.companyRepo.findByCnpj(sanitizedCnpj);
+      if (existing) throw new ConflictError("CNPJ já cadastrado");
     }
 
     const company = await this.companyRepo.create({
       name: payload.name.trim(),
-      cnpj: payload.cnpj ?? null,
+      cnpj: sanitizedCnpj ?? null,
     });
 
     return company;

@@ -69,4 +69,27 @@ describe("CreateCompanyUseCase", () => {
     await expect(uc.execute({ name: "A" })).rejects.toThrow(ValidationError);
     await expect(uc.execute({ name: "" })).rejects.toThrow(ValidationError);
   });
+
+  it("should sanitize CNPJ (remove non-digits)", async () => {
+    const repo = new FakeRepo();
+    const uc = new CreateCompanyUseCase(repo);
+    const company = await uc.execute({
+      name: "Clinic A",
+      cnpj: "12.345.678/0001-90",
+    });
+
+    expect(company.cnpj).toBe("12345678000190");
+  });
+
+  // Teste para CNPJ vazio após sanitização
+  it("should set CNPJ to null if only non-digits", async () => {
+    const repo = new FakeRepo();
+    const uc = new CreateCompanyUseCase(repo);
+    const company = await uc.execute({
+      name: "Clinic A",
+      cnpj: "---",
+    });
+
+    expect(company.cnpj).toBeNull();
+  });
 });
