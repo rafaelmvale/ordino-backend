@@ -9,6 +9,7 @@ import { setupSwagger } from "./infra/http/swagger";
 import { ErrorLoggerInterceptor } from "./infra/http/interceptors/error-logger.interceptor";
 import { logger } from "./shared/logger";
 import { FastifyReply, FastifyRequest } from "fastify";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -20,6 +21,14 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix("api");
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: false,
+    })
+  );
 
   const fastifyInstance = app.getHttpAdapter().getInstance();
 
@@ -101,4 +110,7 @@ async function bootstrap() {
     );
   }
 }
-bootstrap();
+bootstrap().catch((err) => {
+  logger.error({ err }, "Failed to start application");
+  process.exit(1);
+});
