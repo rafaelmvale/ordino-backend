@@ -23,7 +23,7 @@
     "@fastify/swagger-ui": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/platform-fastify": "^9.0.0",
+    "@nestjs/platform-fastify": "^11.1.9",
     "@nestjs/swagger": "^7.4.2",
     "@prisma/client": "^5.0.0",
     "class-transformer": "^0.5.1",
