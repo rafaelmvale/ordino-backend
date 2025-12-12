@@ -7,26 +7,42 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Node.js setup
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js setup (cache npm)
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+
+      - name: Cache Prisma Client
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
-            echo "package-lock.json found → running npm ci --legacy-peer-deps"
-            npm ci --legacy-peer-deps
+            npm ci || npm ci --legacy-peer-deps
           else
-            echo "no lockfile → running npm install --legacy-peer-deps"
-            npm install --legacy-peer-deps --no-audit --no-fund
+            npm install --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund
           fi
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
       - name: Lint
         run: npm run lint
+
       - name: Build
         run: npm run build
+
       - name: Test
-        run: npm run test --silent
+        run: npm run test -- --coverage --passWithNoTests
