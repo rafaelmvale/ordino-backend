@@ -1,39 +1,21 @@
 import { INestApplication } from "@nestjs/common";
-import * as fs from "fs";
-import * as path from "path";
-import * as yaml from "yamljs";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 export async function setupSwagger(app: INestApplication) {
-  const yamlPath = path.join(process.cwd(), "src", "docs", "openapi.yaml");
+  const config = new DocumentBuilder()
+    .setTitle("Ordino API")
+    .setDescription(
+      "API para Ordino (MVP) — agendamentos, empresas e auth magic link"
+    )
+    .setVersion("0.1.0")
+    .addBearerAuth()
+    .build();
 
-  const fastifyInstance = app.getHttpAdapter().getInstance();
-
-  if (fs.existsSync(yamlPath)) {
-    const yamlContent = fs.readFileSync(yamlPath, "utf8");
-    const spec = yaml.parse(yamlContent);
-
-    await fastifyInstance.register(require("@fastify/swagger"), {
-      mode: "dynamic",
-      openapi: spec,
-    });
-
-    await fastifyInstance.register(require("@fastify/swagger-ui"), {
-      routePrefix: "/api/docs",
-      uiConfig: {
-        docExpansion: "list",
-        deepLinking: false,
-      },
-    });
-    return;
-  }
-
-  await fastifyInstance.register(require("@fastify/swagger"), {
-    routePrefix: "/api/docs",
-    swagger: {
-      info: { title: "Ordino API (fallback)", version: "0.1.0" },
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api/docs", app, document, {
+    swaggerOptions: {
+      docExpansion: "list",
+      deepLinking: false,
     },
-  });
-  await fastifyInstance.register(require("@fastify/swagger-ui"), {
-    routePrefix: "/api/docs",
   });
 }

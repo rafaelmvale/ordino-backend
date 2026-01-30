@@ -7,12 +7,14 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import { CreateCompanyDto } from "../dto/create-company.dto";
 import { CreateCompanyUseCase } from "../../../use-cases/companies/create-company/create-company.usecase";
 import { PrismaCompanyRepository } from "../../db/prisma.company.repository";
 import { NotFoundError } from "../../../shared/errors";
 import { CompanyResponseDto } from "../dto/company-response.dto";
 
+@ApiTags("Companies")
 @Controller("companies")
 export class CompaniesController {
   constructor(
@@ -22,6 +24,14 @@ export class CompaniesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create company (onboarding)" })
+  @ApiBody({ type: CreateCompanyDto })
+  @ApiResponse({
+    status: 201,
+    description: "Company created",
+    type: CompanyResponseDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid data" })
   async create(@Body() dto: CreateCompanyDto): Promise<CompanyResponseDto> {
     const company = await this.createCompanyUseCase.execute({
       name: dto.name,
