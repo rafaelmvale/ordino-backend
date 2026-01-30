@@ -7,7 +7,13 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from "@nestjs/swagger";
 import { CreateCompanyDto } from "../dto/create-company.dto";
 import { CreateCompanyUseCase } from "../../../use-cases/companies/create-company/create-company.usecase";
 import { PrismaCompanyRepository } from "../../db/prisma.company.repository";
@@ -15,6 +21,7 @@ import { NotFoundError } from "../../../shared/errors";
 import { CompanyResponseDto } from "../dto/company-response.dto";
 
 @ApiTags("Companies")
+@ApiBearerAuth()
 @Controller("companies")
 export class CompaniesController {
   constructor(

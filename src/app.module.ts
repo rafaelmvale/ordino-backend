@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { HealthController } from "@infra/http/controllers/health.controller";
 import { CompaniesController } from "@infra/http/controllers/companies.controller";
 import { AuthController } from "@infra/http/controllers/auth.controller";
@@ -9,6 +9,7 @@ import { PrismaMagicTokenRepository } from "@infra/db/prisma.magic-token.reposit
 import { CreateCompanyUseCase } from "@use-cases/companies/create-company/create-company.usecase";
 import { RequestMagicLinkUseCase } from "@use-cases/auth/request-magic-link";
 import { VerifyMagicLinkUseCase } from "@use-cases/auth/verify-magic-link";
+import { TenantResolverMiddleware } from "@infra/http/middlewares/tenant-resolver.middleware";
 
 @Module({
   imports: [],
@@ -46,4 +47,10 @@ import { VerifyMagicLinkUseCase } from "@use-cases/auth/verify-magic-link";
     PrismaMagicTokenRepository,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply middleware only to protected routes (companies)
+    // This avoids conflicts with Swagger and auth routes
+    consumer.apply(TenantResolverMiddleware).forRoutes(CompaniesController);
+  }
+}
