@@ -19,4 +19,13 @@ bin-release/
 node_modules/
 dist/
 
+# Environment and secrets
 .env
+
+# Editor and local configs
+.cursor/
+.agents/
+.claude/
+
+# Test coverage
+coverage/
